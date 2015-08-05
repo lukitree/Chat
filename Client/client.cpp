@@ -8,6 +8,7 @@ Client::Client(QWidget *parent)
 	tcpSocket = new QTcpSocket(this);
 
 	username = "NoName";
+	credentialsSent = false;
 
 	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(getMessage()));
 	connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displayError(QAbstractSocket::SocketError)));
@@ -34,16 +35,11 @@ void Client::on_sendButton_clicked()
 	{
 		QByteArray msg;
 		QDataStream out(&msg, QIODevice::WriteOnly);
-
 		out.setVersion(QDataStream::Qt_4_0);
 
-		message = username + ": " + message;
 		out << message;
 
 		tcpSocket->write(msg);
-
-		//new QListWidgetItem(username + ": " + message, ui.messageList);
-		//ui.messageList->scrollToBottom();
 	}
 }
 
@@ -59,11 +55,14 @@ void Client::on_actionConnect_triggered()
 
 		QString status = tr("-> Connecting to %1 on port %2.").arg(hostname).arg(port);
 		new QListWidgetItem(status, ui.messageList);
+		ui.messageList->scrollToBottom();
 
 		tcpSocket->abort();
 		tcpSocket->connectToHost(hostname, port);
-	}
 
+		connect(tcpSocket, SIGNAL(connected()), this, SLOT(sendCredentials()));
+		connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
+	}
 }
 
 void Client::on_actionDisconnect_triggered()
@@ -72,6 +71,7 @@ void Client::on_actionDisconnect_triggered()
 
 	QString status = tr("-> Disconnecting from %1.").arg(promptConnect.hostnameEdit->text());
 	new QListWidgetItem(status, ui.messageList);
+	ui.messageList->scrollToBottom();
 }
 
 void Client::getMessage()
@@ -82,8 +82,31 @@ void Client::getMessage()
 	QString message;
 	in >> message;
 
-	new QListWidgetItem(message, ui.messageList);
-	ui.messageList->scrollToBottom();
+	enum class COMMAND { USERLIST, };
+	COMMAND cmd;
+
+	if (message == "_LST_")
+		cmd = COMMAND::USERLIST;
+
+	switch (cmd)
+	{
+	case COMMAND::USERLIST:
+		ui.userList->clear();
+		in >> message;
+		while (message != "_END_")
+		{
+			in >> message;
+			new QListWidgetItem(message, ui.userList);
+			ui.userList->scrollToBottom();
+		}
+		break;
+	default:
+		//in >> message;
+
+		new QListWidgetItem(message, ui.messageList);
+		ui.messageList->scrollToBottom();
+	}
+
 }
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
@@ -109,4 +132,32 @@ void Client::displayError(QAbstractSocket::SocketError socketError)
 			QMessageBox::information(this, tr("Chat Client"),
 				tr("The following error occurred: %1.").arg(tcpSocket->errorString()));
 	}
+}
+
+void Client::sendCredentials()
+{
+	if (!credentialsSent)
+	{
+		credentialsSent = true;
+
+		new QListWidgetItem("-> Sending Credentials...", ui.messageList);
+		ui.messageList->scrollToBottom();
+
+		QByteArray block;
+		QDataStream out(&block, QIODevice::WriteOnly);
+		out.setVersion(QDataStream::Qt_4_0);
+
+		QString command = "_USR_";
+		out << command;
+		out << username;
+		tcpSocket->write(block);
+	}
+}
+
+void Client::onDisconnect()
+{
+	new QListWidgetItem("Disconnected.", ui.messageList);
+	ui.messageList->scrollToBottom();
+	ui.userList->clear();
+	credentialsSent = false;
 }

@@ -32,6 +32,7 @@ class Ui_ClientClass
 public:
     QAction *actionConnect;
     QAction *actionDisconnect;
+    QAction *actionClear_Chat;
     QWidget *centralWidget;
     QSplitter *splitter;
     QWidget *layoutWidget;
@@ -44,6 +45,7 @@ public:
     QPushButton *sendButton;
     QMenuBar *menuBar;
     QMenu *menuConnect;
+    QMenu *menuChat;
     QStatusBar *statusBar;
 
     void setupUi(QMainWindow *ClientClass)
@@ -55,6 +57,8 @@ public:
         actionConnect->setObjectName(QStringLiteral("actionConnect"));
         actionDisconnect = new QAction(ClientClass);
         actionDisconnect->setObjectName(QStringLiteral("actionDisconnect"));
+        actionClear_Chat = new QAction(ClientClass);
+        actionClear_Chat->setObjectName(QStringLiteral("actionClear_Chat"));
         centralWidget = new QWidget(ClientClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         splitter = new QSplitter(centralWidget);
@@ -113,6 +117,8 @@ public:
         menuBar->setGeometry(QRect(0, 0, 601, 21));
         menuConnect = new QMenu(menuBar);
         menuConnect->setObjectName(QStringLiteral("menuConnect"));
+        menuChat = new QMenu(menuBar);
+        menuChat->setObjectName(QStringLiteral("menuChat"));
         ClientClass->setMenuBar(menuBar);
         statusBar = new QStatusBar(ClientClass);
         statusBar->setObjectName(QStringLiteral("statusBar"));
@@ -122,11 +128,14 @@ public:
         QWidget::setTabOrder(messageList, userList);
 
         menuBar->addAction(menuConnect->menuAction());
+        menuBar->addAction(menuChat->menuAction());
         menuConnect->addAction(actionConnect);
         menuConnect->addAction(actionDisconnect);
+        menuChat->addAction(actionClear_Chat);
 
         retranslateUi(ClientClass);
         QObject::connect(messageEdit, SIGNAL(returnPressed()), sendButton, SLOT(click()));
+        QObject::connect(actionClear_Chat, SIGNAL(triggered()), messageList, SLOT(clear()));
 
         messageList->setCurrentRow(-1);
         sendButton->setDefault(false);
@@ -140,8 +149,10 @@ public:
         ClientClass->setWindowTitle(QApplication::translate("ClientClass", "Client", 0));
         actionConnect->setText(QApplication::translate("ClientClass", "Connect", 0));
         actionDisconnect->setText(QApplication::translate("ClientClass", "Disconnect", 0));
+        actionClear_Chat->setText(QApplication::translate("ClientClass", "Clear Chat", 0));
         sendButton->setText(QApplication::translate("ClientClass", "Send", 0));
         menuConnect->setTitle(QApplication::translate("ClientClass", "Connection", 0));
+        menuChat->setTitle(QApplication::translate("ClientClass", "Chat", 0));
     } // retranslateUi
 
 };

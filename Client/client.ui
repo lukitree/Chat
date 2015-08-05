@@ -106,7 +106,14 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
    </widget>
+   <widget class="QMenu" name="menuChat">
+    <property name="title">
+     <string>Chat</string>
+    </property>
+    <addaction name="actionClear_Chat"/>
+   </widget>
    <addaction name="menuConnect"/>
+   <addaction name="menuChat"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
@@ -117,6 +124,11 @@
   <action name="actionDisconnect">
    <property name="text">
     <string>Disconnect</string>
+   </property>
+  </action>
+  <action name="actionClear_Chat">
+   <property name="text">
+    <string>Clear Chat</string>
    </property>
   </action>
  </widget>
@@ -144,6 +156,22 @@
     <hint type="destinationlabel">
      <x>464</x>
      <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClear_Chat</sender>
+   <signal>triggered()</signal>
+   <receiver>messageList</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>153</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>

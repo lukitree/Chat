@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>370</width>
+    <width>451</width>
     <height>298</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Server</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -35,6 +35,16 @@
       <widget class="QListWidget" name="statusList"/>
      </item>
     </layout>
+   </widget>
+   <widget class="QListWidget" name="userList">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>30</y>
+      <width>71</width>
+      <height>261</height>
+     </rect>
+    </property>
    </widget>
   </widget>
  </widget>

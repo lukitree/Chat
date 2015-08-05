@@ -26,36 +26,40 @@ class Ui_ServerClass
 {
 public:
     QWidget *centralWidget;
-    QWidget *widget;
+    QWidget *layoutWidget;
     QVBoxLayout *verticalLayout;
     QLabel *statusText;
     QListWidget *statusList;
+    QListWidget *userList;
 
     void setupUi(QMainWindow *ServerClass)
     {
         if (ServerClass->objectName().isEmpty())
             ServerClass->setObjectName(QStringLiteral("ServerClass"));
-        ServerClass->resize(370, 298);
+        ServerClass->resize(451, 298);
         centralWidget = new QWidget(ServerClass);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        widget = new QWidget(centralWidget);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(10, 10, 351, 281));
-        verticalLayout = new QVBoxLayout(widget);
+        layoutWidget = new QWidget(centralWidget);
+        layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
+        layoutWidget->setGeometry(QRect(10, 10, 351, 281));
+        verticalLayout = new QVBoxLayout(layoutWidget);
         verticalLayout->setSpacing(6);
         verticalLayout->setContentsMargins(11, 11, 11, 11);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
-        statusText = new QLabel(widget);
+        statusText = new QLabel(layoutWidget);
         statusText->setObjectName(QStringLiteral("statusText"));
 
         verticalLayout->addWidget(statusText);
 
-        statusList = new QListWidget(widget);
+        statusList = new QListWidget(layoutWidget);
         statusList->setObjectName(QStringLiteral("statusList"));
 
         verticalLayout->addWidget(statusList);
 
+        userList = new QListWidget(centralWidget);
+        userList->setObjectName(QStringLiteral("userList"));
+        userList->setGeometry(QRect(370, 30, 71, 261));
         ServerClass->setCentralWidget(centralWidget);
 
         retranslateUi(ServerClass);

@@ -21,6 +21,8 @@ private slots:
 	void on_actionDisconnect_triggered();
 	void displayError(QAbstractSocket::SocketError socketError);
 	void getMessage();
+	void sendCredentials();
+	void onDisconnect();
 
 private:
 	Ui::ClientClass ui;
@@ -31,6 +33,8 @@ private:
 	ConnectDialog promptConnect;
 	QTcpSocket *tcpSocket;
 	quint16 blockSize;
+
+	bool credentialsSent;
 };
 
 #endif // CLIENT_H
