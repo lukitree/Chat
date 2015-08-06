@@ -19,7 +19,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>351</width>
+      <width>331</width>
       <height>281</height>
      </rect>
     </property>
@@ -39,11 +39,14 @@
    <widget class="QListWidget" name="userList">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>350</x>
       <y>30</y>
-      <width>71</width>
+      <width>91</width>
       <height>261</height>
      </rect>
+    </property>
+    <property name="sortingEnabled">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

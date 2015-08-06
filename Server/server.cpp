@@ -19,7 +19,7 @@ Server::Server(QWidget *parent)
 
 	QTimer *timer = new QTimer(this);
 	connect(timer, SIGNAL(timeout()), this, SIGNAL(SEND_UserList()));
-	timer->start(1000000);
+	timer->start(6000);
 
 	connect(tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
 	connect(this, SIGNAL(newConnection()), this, SLOT(getMessage()));
@@ -175,8 +175,6 @@ void Server::getMessage()
 		userList.insert(std::make_pair(ID, username));
 		new QListWidgetItem(username, ui.userList);
 		ui.userList->scrollToBottom();
-
-		emit SEND_UserList();
 		break;
 	}
 	default:

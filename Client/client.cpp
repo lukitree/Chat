@@ -158,7 +158,7 @@ void Client::sendCredentials()
 
 void Client::onDisconnect()
 {
-	new QListWidgetItem("Disconnected.", ui.messageList);
+	new QListWidgetItem("-> Disconnected.", ui.messageList);
 	ui.messageList->scrollToBottom();
 	ui.userList->clear();
 	credentialsSent = false;
