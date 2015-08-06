@@ -82,22 +82,24 @@ void Client::getMessage()
 	QString message;
 	in >> message;
 
-	enum class COMMAND { USERLIST, };
-	COMMAND cmd;
+	enum class COMMAND { NONE, USERLIST};
+	COMMAND cmd = COMMAND::NONE;
 
-	if (message == "_LST_")
+	QStringRef checkCmd(&message, 0, 5);
+	if (checkCmd == "_LST_")
 		cmd = COMMAND::USERLIST;
+
+	QStringList commandList;
 
 	switch (cmd)
 	{
 	case COMMAND::USERLIST:
+		commandList = message.split(" ", QString::SkipEmptyParts);
+		commandList.removeFirst();
 		ui.userList->clear();
-		in >> message;
-		while (message != "_END_")
+		for (auto i : commandList)
 		{
-			in >> message;
-			new QListWidgetItem(message, ui.userList);
-			ui.userList->scrollToBottom();
+			new QListWidgetItem(i, ui.userList);
 		}
 		break;
 	default:

@@ -17,8 +17,13 @@ Server::Server(QWidget *parent)
 	int port = tcpServer->serverPort();
 	ui.statusText->setText(tr("Listening on port: %1").arg(port));
 
+	QTimer *timer = new QTimer(this);
+	connect(timer, SIGNAL(timeout()), this, SIGNAL(SEND_UserList()));
+	timer->start(1000000);
+
 	connect(tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
 	connect(this, SIGNAL(newConnection()), this, SLOT(getMessage()));
+	connect(this, SIGNAL(SEND_UserList()), this, SLOT(sendUserList()));
 }
 
 Server::~Server()
@@ -32,6 +37,7 @@ void Server::newConnection()
 
 	QTcpSocket *newSocket = tcpServer->nextPendingConnection();
 	connect(newSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
+	connect(newSocket, SIGNAL(disconnected()), this, SLOT(sendUserList()));
 	connect(newSocket, SIGNAL(readyRead()), this, SLOT(getMessage()));
 	clientConnections.append(newSocket);
 
@@ -50,9 +56,37 @@ void Server::onDisconnect()
 
 	if (socket != 0)
 	{
-		//auto itr = userList.find(socket->socketDescriptor());
-		//auto i = ui.userList->findItems(itr->second, Qt::MatchExactly);
-		//ui.userList->takeItem(i);
+		std::vector<int> currentSockets;
+
+		// Look for sockets that aren't connected
+		int socketID = 0;
+		for (auto i : clientConnections)
+		{
+			currentSockets.push_back(i->socketDescriptor());
+		}
+		for (auto i : userList)
+		{
+			bool found = true;
+			for (auto ii : currentSockets)
+			{
+				if (i.first == ii)
+					found = false;
+			}
+			if (found == true)
+			{
+				socketID = i.first;
+			}
+		}
+
+		auto iter = userList.find(socketID);
+		if (iter != userList.end())
+			userList.erase(iter);
+
+		ui.userList->clear();
+		for (auto i : userList)
+		{
+			new QListWidgetItem(i.second, ui.userList);
+		}
 
 		clientConnections.removeAll(socket);
 		socket->deleteLater();
@@ -108,16 +142,43 @@ void Server::getMessage()
 	switch (cmd)
 	{
 	case COMMAND::USERNAME:
-
+	{
 		in >> message;
 
 		username = message;
 		ID = client->socketDescriptor();
 
+		//Check if username is taken
+		int numInc = 0;
+		bool isTaken = true;
+		QString tempname = username;
+		while (isTaken)
+		{
+			isTaken = false;
+			for (auto i : userList)
+			{
+				if (i.second == tempname)
+				{
+					isTaken = true;
+					++numInc;
+				}
+			}
+
+			if (isTaken)
+			{
+				tempname = username + "(" + QString::number(numInc) + ")";
+			}
+		}
+
+		username = tempname;
+
 		userList.insert(std::make_pair(ID, username));
 		new QListWidgetItem(username, ui.userList);
 		ui.userList->scrollToBottom();
+
+		emit SEND_UserList();
 		break;
+	}
 	default:
 		it = userList.find(client->socketDescriptor());
 		updateStatus("MSG: (" + it->second + ") " + message);
@@ -136,21 +197,24 @@ void Server::updateStatus(QString message)
 	ui.statusList->scrollToBottom();
 }
 
-/* not implemented
 void Server::sendUserList()
 {
-	QTcpSocket *newSocket = qobject_cast<QTcpSocket*>(sender());
-
 	QByteArray block;
 	QDataStream out(&block, QIODevice::WriteOnly);
 	out.setVersion(QDataStream::Qt_4_0);
+	QString userlist;
 
-	out << "_LST_";
+	userlist = "_LST_";
 	for (auto i : userList)
 	{
-		out << i.second;
+		userlist += " ";
+		userlist += i.second;
 	}
-	out << "_END_";
-	newSocket->write(block);
+
+	out << userlist;
+
+	for (auto i : clientConnections)
+	{
+		i->write(block);
+	}
 }
-*/

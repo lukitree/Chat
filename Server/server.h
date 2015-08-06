@@ -7,6 +7,7 @@
 #include <QTcpSocket>
 #include <QMessageBox>
 #include <QList>
+#include <QTimer>
 
 class Server : public QMainWindow
 {
@@ -16,20 +17,23 @@ public:
 	Server(QWidget *parent = 0);
 	~Server();
 
+signals:
+	void SEND_UserList();
+
 private slots:
 	void sendMessage(QString message, QTcpSocket& socket);
 	void sendToAll(QString message);
 	void getMessage();
 	void newConnection();
 	void onDisconnect();
-	// void sendUserList(); // not implemented
+	void sendUserList();
 
 private:
 	Ui::ServerClass ui;
 
 	QTcpServer *tcpServer;
 	QList<QTcpSocket*> clientConnections;
-	std::map<int, QString> userList;
+	std::map<const int, QString> userList;
 
 	void updateStatus(QString message);
 };
