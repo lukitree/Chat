@@ -128,30 +128,33 @@ void Server::getMessage()
 	QString message;
 	in >> message;
 
-	enum class COMMAND { USERNAME, };
+	enum class COMMAND { NONE, USERNAME, USERCMD};
 	COMMAND cmd;
 
 	if (message == "_USR_")
 		cmd = COMMAND::USERNAME;
 
-	QString username;
-	QString userAddress;
-	int ID;
-	std::map<int, QString>::iterator it;
+	if (message == "_UCD_")
+	{
+		cmd = COMMAND::USERCMD;
+	}
+
 
 	switch (cmd)
 	{
 	case COMMAND::USERNAME:
 	{
+
 		in >> message;
 
-		username = message;
-		ID = client->socketDescriptor();
+		QString username = message;
+		QString tempname = username;
+		int ID = client->socketDescriptor();
 
 		//Check if username is taken
 		int numInc = 0;
 		bool isTaken = true;
-		QString tempname = username;
+
 		while (isTaken)
 		{
 			isTaken = false;
@@ -177,11 +180,15 @@ void Server::getMessage()
 		ui.userList->scrollToBottom();
 		break;
 	}
+	case COMMAND::USERCMD:
+	{
+
+	}
 	default:
+		std::map<int, QString>::iterator it;
 		it = userList.find(client->socketDescriptor());
 		updateStatus("MSG: (" + it->second + ") " + message);
 
-		std::map<int, QString>::iterator it;
 		it = userList.find(client->socketDescriptor());
 		QString usr = it->second;
 		message = usr + ": " + message;
