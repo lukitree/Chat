@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>601</width>
+    <width>600</width>
     <height>378</height>
    </rect>
   </property>
@@ -98,6 +98,11 @@
     <property name="sortingEnabled">
      <bool>true</bool>
     </property>
+    <item>
+     <property name="text">
+      <string>&lt;Userlist&gt;</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -105,7 +110,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>601</width>
+     <width>600</width>
      <height>21</height>
     </rect>
    </property>
