@@ -22,7 +22,6 @@ signals:
 
 private slots:
 	void sendMessage(QString message, QTcpSocket& socket);
-	void sendToAll(QString message);
 	void getMessage();
 	void newConnection();
 	void onDisconnect();
@@ -36,6 +35,9 @@ private:
 	std::map<const int, QString> userList;
 
 	void updateStatus(QString message);
+	void doCommand(QString command, int ID);
+	void sendToID(QString message, int ID);
+	void sendToAll(QString message);
 };
 
 #endif // SERVER_H

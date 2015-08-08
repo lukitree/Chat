@@ -119,6 +119,21 @@ void Server::sendToAll(QString message)
 	}
 }
 
+void Server::sendToID(QString message, int ID)
+{
+	QByteArray msg;
+	QDataStream out(&msg, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_4_0);
+
+	out << message;
+
+	for (auto i : clientConnections)
+	{
+		if (i->socketDescriptor() == ID)
+			i->write(msg);
+	}
+}
+
 void Server::getMessage()
 {
 	QTcpSocket *client = qobject_cast<QTcpSocket*>(sender());
@@ -128,13 +143,16 @@ void Server::getMessage()
 	QString message;
 	in >> message;
 
+	QStringList messageTokens;
+	messageTokens = message.split(" ", QString::SkipEmptyParts);
+
 	enum class COMMAND { NONE, USERNAME, USERCMD};
-	COMMAND cmd;
+	COMMAND cmd = COMMAND::NONE;
 
 	if (message == "_USR_")
 		cmd = COMMAND::USERNAME;
 
-	if (message == "_UCD_")
+	if (messageTokens.at(0) == "_UCD_")
 	{
 		cmd = COMMAND::USERCMD;
 	}
@@ -182,7 +200,15 @@ void Server::getMessage()
 	}
 	case COMMAND::USERCMD:
 	{
-
+		messageTokens.removeFirst();
+		message.clear();
+		for (auto i : messageTokens)
+		{
+			message += i;
+			message += " ";
+		}
+		doCommand(message, client->socketDescriptor());
+		break;
 	}
 	default:
 		std::map<int, QString>::iterator it;
@@ -222,4 +248,56 @@ void Server::sendUserList()
 	{
 		i->write(block);
 	}
+}
+
+void Server::doCommand(QString command, int ID)
+{
+	QString message = "Server: ";
+	QStringList commandTokens = command.split(" ", QString::SkipEmptyParts);
+	command = commandTokens.takeFirst();
+
+	if (command == "/hello")
+	{
+		message += "Hi.";
+	}
+	else if (command == "/msg" || command == "/whisper" || command == "/pm")
+	{
+		QString recipient = commandTokens.takeFirst();
+		int rID = 0;
+		for (auto i : userList)
+		{
+			if (i.second == recipient)
+				rID = i.first;
+		}
+
+		if (rID == 0)
+			message += "User not found.";
+		else
+		{
+			QString text;
+			text.clear();
+			for (auto i : commandTokens)
+			{
+				text += i;
+				text += " ";
+			}
+
+			auto user = userList.find(ID);
+
+			message = "* To: " + recipient + ": " + text;
+			QString rMessage = "* From: " + user->second + ": " + text;
+			sendToID(rMessage, rID);
+
+			QString status = "PM: (" + user->second + " -> " + recipient + ") " + text;
+			new QListWidgetItem(status, ui.statusList);
+		}
+	}
+	else
+	{
+		message += "Invalid command";
+	}
+
+
+	// return to sender
+	sendToID(message, ID);
 }
