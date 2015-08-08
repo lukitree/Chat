@@ -292,6 +292,19 @@ void Server::doCommand(QString command, int ID)
 			new QListWidgetItem(status, ui.statusList);
 		}
 	}
+	else if (command == "/help")
+	{
+		message = "** Help **\n";
+		message += '\n';
+
+		// Private messaging
+		message += "** Use /msg, /pm or /whisper to message another user privately.\n";
+		message += "** Example: /msg Lucky07 Hey, when did you get on?\n";
+		message += '\n';
+
+		// Server reply
+		message += "** Use /hello to check for a server reply.";
+	}
 	else
 	{
 		message += "Invalid command";
