@@ -14,7 +14,7 @@
    <string>Client</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -114,6 +114,7 @@
      <string>Connection</string>
     </property>
     <addaction name="actionConnect"/>
+    <addaction name="actionReconnect"/>
     <addaction name="actionDisconnect"/>
    </widget>
    <widget class="QMenu" name="menuChat">
@@ -138,6 +139,11 @@
   <action name="actionClear_Chat">
    <property name="text">
     <string>Clear Chat</string>
+   </property>
+  </action>
+  <action name="actionReconnect">
+   <property name="text">
+    <string>Reconnect</string>
    </property>
   </action>
  </widget>
