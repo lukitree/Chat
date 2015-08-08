@@ -10,8 +10,14 @@ Client::Client(QWidget *parent)
 	username = "NoName";
 	credentialsSent = false;
 
+	ui.actionDisconnect->setDisabled(true);
+	ui.actionReconnect->setDisabled(true);
+
 	connect(tcpSocket, SIGNAL(readyRead()), this, SLOT(getMessage()));
 	connect(tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displayError(QAbstractSocket::SocketError)));
+	connect(tcpSocket, SIGNAL(connected()), this, SLOT(sendCredentials()));
+	connect(tcpSocket, SIGNAL(connected()), this, SLOT(onConnect()));
+	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
 }
 
 Client::~Client()
@@ -33,13 +39,20 @@ void Client::on_sendButton_clicked()
 
 	if (!message.isEmpty())
 	{
-		QByteArray msg;
-		QDataStream out(&msg, QIODevice::WriteOnly);
-		out.setVersion(QDataStream::Qt_4_0);
+		if (message.at(0) == '/')
+		{
+			sendUserCommand(message);
+		}
+		else
+		{
+			QByteArray msg;
+			QDataStream out(&msg, QIODevice::WriteOnly);
+			out.setVersion(QDataStream::Qt_4_0);
 
-		out << message;
+			out << message;
 
-		tcpSocket->write(msg);
+			tcpSocket->write(msg);
+		}
 	}
 }
 
@@ -60,8 +73,6 @@ void Client::on_actionConnect_triggered()
 		tcpSocket->abort();
 		tcpSocket->connectToHost(hostname, port);
 
-		connect(tcpSocket, SIGNAL(connected()), this, SLOT(sendCredentials()));
-		connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
 	}
 }
 
@@ -72,6 +83,18 @@ void Client::on_actionDisconnect_triggered()
 	QString status = tr("-> Disconnecting from %1.").arg(promptConnect.hostnameEdit->text());
 	new QListWidgetItem(status, ui.messageList);
 	ui.messageList->scrollToBottom();
+}
+
+void Client::on_actionReconnect_triggered()
+{
+	QString hostname = promptConnect.hostnameEdit->text();
+	quint16 port = promptConnect.portEdit->text().toInt();
+	QString status = tr("-> Reconnecting to %1.").arg(hostname);
+	new QListWidgetItem(status, ui.messageList);
+	ui.messageList->scrollToBottom();
+
+	tcpSocket->abort();
+	tcpSocket->connectToHost(hostname, port);
 }
 
 void Client::getMessage()
@@ -162,4 +185,25 @@ void Client::onDisconnect()
 	ui.messageList->scrollToBottom();
 	ui.userList->clear();
 	credentialsSent = false;
+	
+	ui.actionDisconnect->setDisabled(true);
+	ui.actionReconnect->setEnabled(true);
+}
+
+void Client::onConnect()
+{
+	ui.actionDisconnect->setEnabled(true);
+	ui.actionReconnect->setDisabled(true);
+}
+
+void Client::sendUserCommand(QString command)
+{
+	QByteArray msg;
+	QDataStream out(&msg, QIODevice::WriteOnly);
+	out.setVersion(QDataStream::Qt_4_0);
+
+	command = "_UCD_ " + command;
+	out << command;
+
+	tcpSocket->write(msg);
 }

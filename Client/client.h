@@ -19,10 +19,12 @@ private slots:
 	void on_sendButton_clicked();
 	void on_actionConnect_triggered();
 	void on_actionDisconnect_triggered();
+	void on_actionReconnect_triggered();
 	void displayError(QAbstractSocket::SocketError socketError);
 	void getMessage();
 	void sendCredentials();
 	void onDisconnect();
+	void onConnect();
 
 private:
 	Ui::ClientClass ui;
@@ -35,6 +37,8 @@ private:
 	quint16 blockSize;
 
 	bool credentialsSent;
+
+	void sendUserCommand(QString command);
 };
 
 #endif // CLIENT_H
