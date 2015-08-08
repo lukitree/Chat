@@ -38,6 +38,9 @@ private:
 	void doCommand(QString command, int ID);
 	void sendToID(QString message, int ID);
 	void sendToAll(QString message);
+
+	QTcpSocket* getSocket(int ID);
+	QString getUsername(int ID);
 };
 
 #endif // SERVER_H

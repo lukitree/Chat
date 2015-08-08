@@ -33,8 +33,6 @@ Server::~Server()
 
 void Server::newConnection()
 {
-	updateStatus("New connection established.");
-
 	QTcpSocket *newSocket = tcpServer->nextPendingConnection();
 	connect(newSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
 	connect(newSocket, SIGNAL(disconnected()), this, SLOT(sendUserList()));
@@ -78,6 +76,8 @@ void Server::onDisconnect()
 			}
 		}
 
+		QString username = getUsername(socketID);
+
 		auto iter = userList.find(socketID);
 		if (iter != userList.end())
 			userList.erase(iter);
@@ -90,7 +90,7 @@ void Server::onDisconnect()
 
 		clientConnections.removeAll(socket);
 		socket->deleteLater();
-		updateStatus("Connection terminated.");
+		updateStatus("Connection terminated. (" + username + ":" + QString::number(socketID) + ")");
 	}
 }
 
@@ -196,6 +196,13 @@ void Server::getMessage()
 		userList.insert(std::make_pair(ID, username));
 		new QListWidgetItem(username, ui.userList);
 		ui.userList->scrollToBottom();
+
+		QString address = getSocket(ID)->peerAddress().toString();
+		QStringList addr = address.split(":", QString::SkipEmptyParts);
+		address = addr.takeLast();
+
+		QString newConnectionMsg = "New connection established. (" + username + ":" + QString::number(ID) + "->" + address + ")";
+		updateStatus(newConnectionMsg);
 		break;
 	}
 	case COMMAND::USERCMD:
@@ -295,12 +302,12 @@ void Server::doCommand(QString command, int ID)
 	else if (command == "/help")
 	{
 		message = "** Help **\n";
-		message += '\n';
+		message += '**\n';
 
 		// Private messaging
 		message += "** Use /msg, /pm or /whisper to message another user privately.\n";
 		message += "** Example: /msg Lucky07 Hey, when did you get on?\n";
-		message += '\n';
+		message += '**\n';
 
 		// Server reply
 		message += "** Use /hello to check for a server reply.";
@@ -313,4 +320,23 @@ void Server::doCommand(QString command, int ID)
 
 	// return to sender
 	sendToID(message, ID);
+}
+
+QTcpSocket* Server::getSocket(int ID)
+{
+	QTcpSocket* socket;
+
+	for (auto i : clientConnections)
+	{
+		if (i->socketDescriptor() == ID)
+			socket = i;
+	}
+
+	return socket;
+}
+
+QString Server::getUsername(int ID)
+{
+	auto itr = userList.find(ID);
+	return itr->second;
 }
