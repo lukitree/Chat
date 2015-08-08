@@ -18,6 +18,7 @@ Client::Client(QWidget *parent)
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(sendCredentials()));
 	connect(tcpSocket, SIGNAL(connected()), this, SLOT(onConnect()));
 	connect(tcpSocket, SIGNAL(disconnected()), this, SLOT(onDisconnect()));
+	connect(ui.userList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(whisperOnClick(QListWidgetItem*)));
 }
 
 Client::~Client()
@@ -206,4 +207,12 @@ void Client::sendUserCommand(QString command)
 	out << command;
 
 	tcpSocket->write(msg);
+}
+
+void Client::whisperOnClick(QListWidgetItem* user)
+{
+	ui.messageEdit->clear();
+	QString insert = "/msg " + user->text() + " ";
+	ui.messageEdit->setText(insert);
+	ui.messageEdit->setFocus();
 }

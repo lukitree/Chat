@@ -25,6 +25,7 @@ private slots:
 	void sendCredentials();
 	void onDisconnect();
 	void onConnect();
+	void whisperOnClick(QListWidgetItem* user);
 
 private:
 	Ui::ClientClass ui;
