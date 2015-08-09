@@ -30,15 +30,14 @@ private slots:
 private:
 	Ui::ClientClass ui;
 
-	QString username;
 	ConnectDialog *promptConnect;
 	QTcpSocket *tcpSocket;
 	quint16 blockSize;
 
 	bool credentialsSent;
 
-	void setUserName(QString name);
 	void sendUserCommand(QString command);
+	QString replaceWhiteSpace(QString text);
 };
 
 #endif // CLIENT_H

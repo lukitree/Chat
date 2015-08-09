@@ -8,7 +8,6 @@ Client::Client(QWidget *parent)
 	tcpSocket = new QTcpSocket(this);
 	promptConnect = new ConnectDialog(this);
 
-	username = "NoName";
 	credentialsSent = false;
 
 	ui.actionDisconnect->setDisabled(true);
@@ -25,11 +24,6 @@ Client::Client(QWidget *parent)
 Client::~Client()
 {
 
-}
-
-void Client::setUserName(QString name)
-{
-	this->username = name;
 }
 
 void Client::on_sendButton_clicked()
@@ -66,7 +60,7 @@ void Client::on_actionConnect_triggered()
 	{
 		QString hostname = promptConnect->hostnameEdit->text();
 		quint16 port = promptConnect->portEdit->text().toInt();
-		setUserName(promptConnect->usernameEdit->text());
+		promptConnect->usernameEdit->setText(replaceWhiteSpace(promptConnect->usernameEdit->text()));
 
 		QString status = tr("-> Connecting to %1 on port %2.").arg(hostname).arg(port);
 		new QListWidgetItem(status, ui.messageList);
@@ -175,6 +169,7 @@ void Client::sendCredentials()
 		out.setVersion(QDataStream::Qt_4_0);
 
 		QString command = "_USR_";
+		QString username = promptConnect->usernameEdit->text();
 		out << command;
 		out << username;
 		tcpSocket->write(block);
@@ -216,4 +211,14 @@ void Client::whisperOnClick(QListWidgetItem* user)
 	QString insert = "/msg " + user->text() + " ";
 	ui.messageEdit->setText(insert);
 	ui.messageEdit->setFocus();
+}
+
+QString Client::replaceWhiteSpace(QString text)
+{
+	text = text.simplified();
+	text.replace(" ", "_");
+	text.replace("\t", "_");
+	text.replace("\n", "_");
+
+	return text;
 }
