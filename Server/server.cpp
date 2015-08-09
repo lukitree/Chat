@@ -4,6 +4,7 @@ Server::Server(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
+	filterWin = new FilterDialog(this);
 
 	tcpServer = new QTcpServer(this);
 	if (!tcpServer->listen(QHostAddress::Any, 12234))
@@ -24,6 +25,8 @@ Server::Server(QWidget *parent)
 	connect(tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
 	connect(this, SIGNAL(newConnection()), this, SLOT(getMessage()));
 	connect(this, SIGNAL(SEND_UserList()), this, SLOT(sendUserList()));
+	connect(ui.filterButton, SIGNAL(clicked()), this, SLOT(showFilteredResults()));
+	connect(ui.sendButton, SIGNAL(clicked()), this, SLOT(serverSendAll()));
 }
 
 Server::~Server()
@@ -231,6 +234,7 @@ void Server::getMessage()
 
 void Server::updateStatus(QString message)
 {
+	message = timestamp() + " " + message;
 	new QListWidgetItem(message, ui.statusList);
 	ui.statusList->scrollToBottom();
 }
@@ -269,34 +273,44 @@ void Server::doCommand(QString command, int ID)
 	}
 	else if (command == "/msg" || command == "/whisper" || command == "/pm")
 	{
-		QString recipient = commandTokens.takeFirst();
-		int rID = 0;
-		for (auto i : userList)
+		if (!commandTokens.isEmpty())
 		{
-			if (i.second == recipient)
-				rID = i.first;
-		}
-
-		if (rID == 0)
-			message += "User not found.";
-		else
-		{
-			QString text;
-			text.clear();
-			for (auto i : commandTokens)
+			QString recipient = commandTokens.takeFirst();
+			int rID = 0;
+			for (auto i : userList)
 			{
-				text += i;
-				text += " ";
+				if (i.second == recipient)
+					rID = i.first;
 			}
 
-			auto user = userList.find(ID);
+			if (rID == 0)
+				message += tr("User \"%1\" not found").arg(recipient);
+			else if (rID == ID)
+				message += "You cannot message yourself.";
+			else
+			{
+				QString text;
+				text.clear();
+				for (auto i : commandTokens)
+				{
+					text += i;
+					text += " ";
+				}
 
-			message = "* To: " + recipient + ": " + text;
-			QString rMessage = "* From: " + user->second + ": " + text;
-			sendToID(rMessage, rID);
+				auto user = userList.find(ID);
 
-			QString status = "PM: (" + user->second + " -> " + recipient + ") " + text;
-			new QListWidgetItem(status, ui.statusList);
+				message = "* To: " + recipient + ": " + text;
+				QString rMessage = "* From: " + user->second + ": " + text;
+				sendToID(rMessage, rID);
+
+				QString status = "PM: (" + user->second + " -> " + recipient + ") " + text;
+				new QListWidgetItem(status, ui.statusList);
+			}
+		}
+		else
+		{
+			message = "*** Error: Incorrect " + command + " syntax.\n"
+				+ "*** Use: " + command + "[username] [message]";
 		}
 	}
 	else if (command == "/help")
@@ -306,6 +320,7 @@ void Server::doCommand(QString command, int ID)
 
 		// Private messaging
 		message += "** Use /msg, /pm or /whisper to message another user privately.\n";
+		message += "** Syntax: /msg [username] [message]";
 		message += "** Example: /msg Lucky07 Hey, when did you get on?\n";
 		message += '**\n';
 
@@ -339,4 +354,40 @@ QString Server::getUsername(int ID)
 {
 	auto itr = userList.find(ID);
 	return itr->second;
+}
+
+void Server::showFilteredResults()
+{
+	filterWin->filterList->clear();
+	QString filterText = ui.inputLine->text();
+
+	for (int i = 0; i < ui.statusList->count(); ++i)
+	{
+		QString searchIn = ui.statusList->item(i)->text();
+		if (searchIn.contains(filterText, Qt::CaseInsensitive))
+		{
+			new QListWidgetItem(searchIn, filterWin->filterList);
+		}
+	}
+
+	filterWin->exec();
+}
+
+void Server::serverSendAll()
+{
+	QString inputText = "Server: " + ui.inputLine->text();
+	sendToAll(inputText);
+	updateStatus(inputText);
+	ui.inputLine->clear();
+}
+
+QString Server::timestamp()
+{
+	QStringList time = QDateTime::currentDateTime().toString().split(" ", QString::SkipEmptyParts);
+	time.removeLast();
+	time.removeFirst();
+	time.removeFirst();
+	time.removeFirst();
+
+	return "[" + time.takeFirst() + "]";
 }

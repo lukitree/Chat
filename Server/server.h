@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QList>
 #include <QTimer>
+#include <QDateTime>
+#include "filterdialog.h"
 
 class Server : public QMainWindow
 {
@@ -26,6 +28,8 @@ private slots:
 	void newConnection();
 	void onDisconnect();
 	void sendUserList();
+	void showFilteredResults();
+	void serverSendAll();
 
 private:
 	Ui::ServerClass ui;
@@ -33,6 +37,7 @@ private:
 	QTcpServer *tcpServer;
 	QList<QTcpSocket*> clientConnections;
 	std::map<const int, QString> userList;
+	FilterDialog *filterWin;
 
 	void updateStatus(QString message);
 	void doCommand(QString command, int ID);
@@ -41,6 +46,7 @@ private:
 
 	QTcpSocket* getSocket(int ID);
 	QString getUsername(int ID);
+	QString timestamp();
 };
 
 #endif // SERVER_H
