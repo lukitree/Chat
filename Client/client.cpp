@@ -6,6 +6,7 @@ Client::Client(QWidget *parent)
 	ui.setupUi(this);
 
 	tcpSocket = new QTcpSocket(this);
+	promptConnect = new ConnectDialog(this);
 
 	username = "NoName";
 	credentialsSent = false;
@@ -61,11 +62,11 @@ void Client::on_actionConnect_triggered()
 {
 	QDataStream in(tcpSocket);
 
-	if (promptConnect.exec())
+	if (promptConnect->exec())
 	{
-		QString hostname = promptConnect.hostnameEdit->text();
-		quint16 port = promptConnect.portEdit->text().toInt();
-		setUserName(promptConnect.usernameEdit->text());
+		QString hostname = promptConnect->hostnameEdit->text();
+		quint16 port = promptConnect->portEdit->text().toInt();
+		setUserName(promptConnect->usernameEdit->text());
 
 		QString status = tr("-> Connecting to %1 on port %2.").arg(hostname).arg(port);
 		new QListWidgetItem(status, ui.messageList);
@@ -81,15 +82,15 @@ void Client::on_actionDisconnect_triggered()
 {
 	tcpSocket->abort();
 
-	QString status = tr("-> Disconnecting from %1.").arg(promptConnect.hostnameEdit->text());
+	QString status = tr("-> Disconnecting from %1.").arg(promptConnect->hostnameEdit->text());
 	new QListWidgetItem(status, ui.messageList);
 	ui.messageList->scrollToBottom();
 }
 
 void Client::on_actionReconnect_triggered()
 {
-	QString hostname = promptConnect.hostnameEdit->text();
-	quint16 port = promptConnect.portEdit->text().toInt();
+	QString hostname = promptConnect->hostnameEdit->text();
+	quint16 port = promptConnect->portEdit->text().toInt();
 	QString status = tr("-> Reconnecting to %1.").arg(hostname);
 	new QListWidgetItem(status, ui.messageList);
 	ui.messageList->scrollToBottom();

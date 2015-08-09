@@ -31,7 +31,7 @@ private:
 	Ui::ClientClass ui;
 
 	QString username;
-	ConnectDialog promptConnect;
+	ConnectDialog *promptConnect;
 	QTcpSocket *tcpSocket;
 	quint16 blockSize;
 
@@ -39,7 +39,6 @@ private:
 
 	void setUserName(QString name);
 	void sendUserCommand(QString command);
-	void filter(QString filterText);
 };
 
 #endif // CLIENT_H
