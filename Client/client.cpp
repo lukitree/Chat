@@ -127,7 +127,6 @@ void Client::getMessage()
 		new QListWidgetItem(message, ui.messageList);
 		ui.messageList->scrollToBottom();
 	}
-
 }
 
 void Client::displayError(QAbstractSocket::SocketError socketError)
@@ -173,6 +172,8 @@ void Client::sendCredentials()
 		out << command;
 		out << username;
 		tcpSocket->write(block);
+
+		setWindowTitle("Chat - " + promptConnect->usernameEdit->text() + " on " + getIP());
 	}
 }
 
@@ -221,4 +222,11 @@ QString Client::replaceWhiteSpace(QString text)
 	text.replace("\n", "_");
 
 	return text;
+}
+
+QString Client::getIP()
+{
+	QStringList raw = tcpSocket->peerAddress().toString().split(":", QString::SkipEmptyParts);
+
+	return raw.takeLast();
 }

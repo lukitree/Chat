@@ -6,6 +6,7 @@
 #include "connectdialog.h"
 #include <QTcpSocket>
 #include <QMessageBox>
+#include <QHostAddress>
 
 class Client : public QMainWindow
 {
@@ -38,6 +39,7 @@ private:
 
 	void sendUserCommand(QString command);
 	QString replaceWhiteSpace(QString text);
+	QString getIP();
 };
 
 #endif // CLIENT_H
